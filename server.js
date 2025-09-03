@@ -9,8 +9,10 @@ console.log('�� Iniciando servidor...');
 console.log('📁 Directorio actual:', __dirname);
 console.log('📦 Archivos en el directorio:', fs.readdirSync(__dirname));
 
+// Importar módulos de base de datos
+let database;
 try {
-  const database = require('./src/utils/database');
+  database = require('./src/utils/database');
   console.log('✅ Módulos importados correctamente');
 } catch (error) {
   console.error('❌ Error importando módulos:', error);
