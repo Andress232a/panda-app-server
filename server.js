@@ -10,7 +10,7 @@ console.log('📁 Directorio actual:', __dirname);
 console.log('📦 Archivos en el directorio:', fs.readdirSync(__dirname));
 
 try {
-  const { testConnection, authenticateUser, registerUser, updateUserProfile, getUserProfile, assignPandita, assignSaldoFidelizado, assignReward, getAdminStats, getUserRewards, getUserById, createPromotion, getPromotions, deletePromotion, cleanupOrphanedFiles, getLoyaltyBalance, getPromoDelMes, getPromotionsByType, assignLeaderPanda, getUserLeaderPandas, getConfigText, updateConfigText, updateAdminProfile, removeLeaderPandas } = require('./src/utils/database');
+  const database = require('./src/utils/database');
   console.log('✅ Módulos importados correctamente');
 } catch (error) {
   console.error('❌ Error importando módulos:', error);
