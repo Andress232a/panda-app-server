@@ -3,15 +3,30 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-const { testConnection, authenticateUser, registerUser, updateUserProfile, getUserProfile, assignPandita, assignSaldoFidelizado, assignReward, getAdminStats, getUserRewards, getUserById, createPromotion, getPromotions, deletePromotion, cleanupOrphanedFiles, getLoyaltyBalance, getPromoDelMes, getPromotionsByType, assignLeaderPanda, getUserLeaderPandas, getConfigText, updateConfigText, updateAdminProfile, removeLeaderPandas } = require('./src/utils/database');
+
+// 🚨 AGREGAR ESTO PARA DEBUG
+console.log('�� Iniciando servidor...');
+console.log('📁 Directorio actual:', __dirname);
+console.log('📦 Archivos en el directorio:', fs.readdirSync(__dirname));
+
+try {
+  const { testConnection, authenticateUser, registerUser, updateUserProfile, getUserProfile, assignPandita, assignSaldoFidelizado, assignReward, getAdminStats, getUserRewards, getUserById, createPromotion, getPromotions, deletePromotion, cleanupOrphanedFiles, getLoyaltyBalance, getPromoDelMes, getPromotionsByType, assignLeaderPanda, getUserLeaderPandas, getConfigText, updateConfigText, updateAdminProfile, removeLeaderPandas } = require('./src/utils/database');
+  console.log('✅ Módulos importados correctamente');
+} catch (error) {
+  console.error('❌ Error importando módulos:', error);
+  process.exit(1);
+}
 
 const app = express();
+console.log('✅ Express app creada');
+
 // ⚠️ IMPORTANTE: Para hosting compartido NO usar puerto personalizado
 // const PORT = process.env.PORT || 3000; // ❌ NO USAR
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+console.log('✅ Middleware configurado');
 
 // Configurar multer para subida de archivos
 const storage = multer.diskStorage({
@@ -44,17 +59,27 @@ const upload = multer({
   }
 });
 
+console.log('✅ Multer configurado');
+
 // Servir archivos estáticos desde la carpeta uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Ruta para probar la conexión a la base de datos
 app.get('/api/test-connection', async (req, res) => {
-  const isConnected = await testConnection();
-  res.json({ connected: isConnected });
+  console.log('🔍 Petición GET /api/test-connection');
+  try {
+    const isConnected = await testConnection();
+    console.log('✅ Conexión BD exitosa:', isConnected);
+    res.json({ connected: isConnected });
+  } catch (error) {
+    console.error('❌ Error en test-connection:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Ruta para autenticar usuario
 app.post('/api/login', async (req, res) => {
+  console.log('�� Petición POST /api/login');
   const { email, password } = req.body;
   
   if (!email || !password) {
@@ -64,12 +89,19 @@ app.post('/api/login', async (req, res) => {
     });
   }
 
-  const result = await authenticateUser(email, password);
-  res.json(result);
+  try {
+    const result = await authenticateUser(email, password);
+    console.log('✅ Login exitoso para:', email);
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error en login:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para registrar usuario
 app.post('/api/register', async (req, res) => {
+  console.log('�� Petición POST /api/register');
   const { nombres, apellidos, cedula, fecha_nacimiento, telefono, email, password } = req.body;
   
   if (!nombres || !apellidos || !cedula || !fecha_nacimiento || !telefono || !email || !password) {
@@ -79,12 +111,19 @@ app.post('/api/register', async (req, res) => {
     });
   }
 
-  const result = await registerUser(nombres, apellidos, cedula, fecha_nacimiento, telefono, email, password);
-  res.json(result);
+  try {
+    const result = await registerUser(nombres, apellidos, cedula, fecha_nacimiento, telefono, email, password);
+    console.log('✅ Usuario registrado:', email);
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error en registro:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para obtener el perfil del usuario
 app.get('/api/profile/:userId', async (req, res) => {
+  console.log('👤 Petición GET /api/profile/:userId');
   const { userId } = req.params;
   
   if (!userId) {
@@ -94,12 +133,18 @@ app.get('/api/profile/:userId', async (req, res) => {
     });
   }
 
-  const result = await getUserProfile(userId);
-  res.json(result);
+  try {
+    const result = await getUserProfile(userId);
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error obteniendo perfil:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para actualizar el perfil del usuario
 app.put('/api/profile/:userId', async (req, res) => {
+  console.log('✏️ Petición PUT /api/profile/:userId');
   const { userId } = req.params;
   const profileData = req.body;
   
@@ -110,14 +155,18 @@ app.put('/api/profile/:userId', async (req, res) => {
     });
   }
 
-  const result = await updateUserProfile(userId, profileData);
-  res.json(result);
+  try {
+    const result = await updateUserProfile(userId, profileData);
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error actualizando perfil:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
-
-
 
 // Ruta para asignar pandita y saldo fidelizado (admin)
 app.post('/api/admin/assign-reward', async (req, res) => {
+  console.log('�� Petición POST /api/admin/assign-reward');
   const { userId, assignedBy, purchaseAmount } = req.body;
   
   if (!userId || !assignedBy || !purchaseAmount) {
@@ -127,12 +176,18 @@ app.post('/api/admin/assign-reward', async (req, res) => {
     });
   }
 
-  const result = await assignReward(userId, assignedBy, purchaseAmount);
-  res.json(result);
+  try {
+    const result = await assignReward(userId, assignedBy, purchaseAmount);
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error asignando recompensa:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para asignar SOLO pandita (admin)
 app.post('/api/admin/assign-pandita', async (req, res) => {
+  console.log('�� Petición POST /api/admin/assign-pandita');
   const { userId, assignedBy } = req.body;
 
   if (!userId || !assignedBy) {
@@ -153,6 +208,7 @@ app.post('/api/admin/assign-pandita', async (req, res) => {
 
 // Ruta para asignar SOLO saldo fidelizado (admin)
 app.post('/api/admin/assign-loyalty-balance', async (req, res) => {
+  console.log('�� Petición POST /api/admin/assign-loyalty-balance');
   const { userId, assignedBy, loyaltyAmount, purchaseAmount } = req.body;
 
   // Permitir compatibilidad: si viene purchaseAmount, usarlo como loyaltyAmount
@@ -176,6 +232,7 @@ app.post('/api/admin/assign-loyalty-balance', async (req, res) => {
 
 // Ruta para obtener estadísticas del admin
 app.get('/api/admin/stats/:adminId', async (req, res) => {
+  console.log('📊 Petición GET /api/admin/stats/:adminId');
   const { adminId } = req.params;
   
   if (!adminId) {
@@ -185,12 +242,18 @@ app.get('/api/admin/stats/:adminId', async (req, res) => {
     });
   }
 
-  const result = await getAdminStats(adminId);
-  res.json(result);
+  try {
+    const result = await getAdminStats(adminId);
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error obteniendo estadísticas:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para obtener recompensas de un usuario
 app.get('/api/user/rewards/:userId', async (req, res) => {
+  console.log('🎁 Petición GET /api/user/rewards/:userId');
   const { userId } = req.params;
   
   if (!userId) {
@@ -200,12 +263,18 @@ app.get('/api/user/rewards/:userId', async (req, res) => {
     });
   }
 
-  const result = await getUserRewards(userId);
-  res.json(result);
+  try {
+    const result = await getUserRewards(userId);
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error obteniendo recompensas:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para actualizar perfil del admin (correo y/o contraseña)
 app.put('/api/admin/update-profile', async (req, res) => {
+  console.log('👨‍💼 Petición PUT /api/admin/update-profile');
   const { email, currentPassword, newPassword, newEmail } = req.body;
   
   if (!email) {
@@ -226,6 +295,7 @@ app.put('/api/admin/update-profile', async (req, res) => {
 
 // Ruta para obtener información del usuario por ID
 app.get('/api/user/:userId', async (req, res) => {
+  console.log('👤 Petición GET /api/user/:userId');
   const { userId } = req.params;
   
   if (!userId) {
@@ -235,12 +305,18 @@ app.get('/api/user/:userId', async (req, res) => {
     });
   }
 
-  const result = await getUserById(userId);
-  res.json(result);
+  try {
+    const result = await getUserById(userId);
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error obteniendo usuario:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para obtener el saldo fidelizado del usuario
 app.get('/api/user/loyalty-balance/:userId', async (req, res) => {
+  console.log('💰 Petición GET /api/user/loyalty-balance/:userId');
   const { userId } = req.params;
   
   if (!userId) {
@@ -250,14 +326,20 @@ app.get('/api/user/loyalty-balance/:userId', async (req, res) => {
     });
   }
 
-  const result = await getLoyaltyBalance(userId);
-  res.json(result);
+  try {
+    const result = await getLoyaltyBalance(userId);
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error obteniendo saldo fidelizado:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Rutas de promociones
 
 // Ruta para subir imagen
 app.post('/api/admin/upload-image', upload.single('image'), async (req, res) => {
+  console.log('�� Petición POST /api/admin/upload-image');
   try {
     if (!req.file) {
       return res.status(400).json({ 
@@ -289,6 +371,7 @@ app.post('/api/admin/upload-image', upload.single('image'), async (req, res) => 
 
 // Ruta para crear una nueva promoción (admin)
 app.post('/api/admin/promotions', async (req, res) => {
+  console.log('�� Petición POST /api/admin/promotions');
   const { title, description, imageUrl, promotionType, createdBy } = req.body;
   
   if (!title || !createdBy || !promotionType) {
@@ -298,24 +381,39 @@ app.post('/api/admin/promotions', async (req, res) => {
     });
   }
 
-  const result = await createPromotion(title, description || '', imageUrl || '', promotionType, createdBy);
-  res.json(result);
+  try {
+    const result = await createPromotion(title, description || '', imageUrl || '', promotionType, createdBy);
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error creando promoción:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para obtener todas las promociones
 app.get('/api/promotions', async (req, res) => {
   console.log('📨 Petición recibida en /api/promotions');
-  const result = await getPromotions();
-  console.log('📤 Promociones enviadas:', result.promotions);
-  res.json(result);
+  try {
+    const result = await getPromotions();
+    console.log('📤 Promociones enviadas:', result.promotions);
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error obteniendo promociones:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para obtener la promoción del mes
 app.get('/api/promo-del-mes', async (req, res) => {
   console.log('🌟 Petición recibida en /api/promo-del-mes');
-  const result = await getPromoDelMes();
-  console.log('📤 Promoción del mes enviada:', result);
-  res.json(result);
+  try {
+    const result = await getPromoDelMes();
+    console.log('📤 Promoción del mes enviada:', result);
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error obteniendo promoción del mes:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para obtener promociones por tipo
@@ -330,9 +428,14 @@ app.get('/api/promotions/:type', async (req, res) => {
     });
   }
   
-  const result = await getPromotionsByType(type);
-  console.log(`📤 Promociones de tipo ${type} enviadas:`, result.promotions);
-  res.json(result);
+  try {
+    const result = await getPromotionsByType(type);
+    console.log(`📤 Promociones de tipo ${type} enviadas:`, result.promotions);
+    res.json(result);
+  } catch (error) {
+    console.error(`❌ Error obteniendo promociones de tipo ${type}:`, error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para eliminar una promoción (admin)
@@ -349,18 +452,28 @@ app.delete('/api/admin/promotions/:promotionId', async (req, res) => {
     });
   }
 
-  console.log('🔄 Llamando a deletePromotion con ID:', promotionId);
-  const result = await deletePromotion(promotionId);
-  console.log('📤 Resultado de eliminación:', result);
-  
-  res.json(result);
+  try {
+    console.log('🔄 Llamando a deletePromotion con ID:', promotionId);
+    const result = await deletePromotion(promotionId);
+    console.log('📤 Resultado de eliminación:', result);
+    
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error eliminando promoción:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para limpiar archivos huérfanos (admin)
 app.post('/api/admin/cleanup-files', async (req, res) => {
-  console.log('🧹 Iniciando limpieza de archivos huérfanos...');
-  const result = await cleanupOrphanedFiles();
-  res.json(result);
+  console.log('�� Iniciando limpieza de archivos huérfanos...');
+  try {
+    const result = await cleanupOrphanedFiles();
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error limpiando archivos:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Rutas para pandas de líder
@@ -378,11 +491,16 @@ app.post('/api/admin/assign-leader-panda', async (req, res) => {
     });
   }
 
-  console.log('🔄 Asignando panda de líder para usuario:', userId, 'por admin:', assignedBy);
-  const result = await assignLeaderPanda(userId, assignedBy);
-  console.log('📤 Resultado de asignación de panda de líder:', result);
-  
-  res.json(result);
+  try {
+    console.log('�� Asignando panda de líder para usuario:', userId, 'por admin:', assignedBy);
+    const result = await assignLeaderPanda(userId, assignedBy);
+    console.log('�� Resultado de asignación de panda de líder:', result);
+    
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error asignando panda de líder:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para obtener pandas de líder de un usuario
@@ -398,10 +516,15 @@ app.get('/api/user/leader-pandas/:userId', async (req, res) => {
     });
   }
 
-  const result = await getUserLeaderPandas(userId);
-  console.log('📤 Pandas de líder enviados:', result);
-  
-  res.json(result);
+  try {
+    const result = await getUserLeaderPandas(userId);
+    console.log('📤 Pandas de líder enviados:', result);
+    
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error obteniendo pandas de líder:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para quitar pandas de líder activos de un usuario (admin)
@@ -436,10 +559,15 @@ app.get('/api/config/text/:keyName', async (req, res) => {
     });
   }
 
-  const result = await getConfigText(keyName);
-  console.log('📤 Texto configurable enviado:', result);
-  
-  res.json(result);
+  try {
+    const result = await getConfigText(keyName);
+    console.log('�� Texto configurable enviado:', result);
+    
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error obteniendo texto configurable:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para actualizar texto configurable (admin)
@@ -456,20 +584,30 @@ app.put('/api/admin/config/text/:keyName', async (req, res) => {
     });
   }
 
-  const result = await updateConfigText(keyName, newText);
-  console.log('📤 Resultado de actualización de texto:', result);
-  
-  res.json(result);
+  try {
+    const result = await updateConfigText(keyName, newText);
+    console.log('📤 Resultado de actualización de texto:', result);
+    
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error actualizando texto configurable:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta específica para obtener términos del programa líder
 app.get('/api/config-texts/leader-terms', async (req, res) => {
   console.log('🏆 Petición para obtener términos del programa líder');
   
-  const result = await getConfigText('leader_terms');
-  console.log('📤 Términos del programa líder enviados:', result);
-  
-  res.json(result);
+  try {
+    const result = await getConfigText('leader_terms');
+    console.log('📤 Términos del programa líder enviados:', result);
+    
+    res.json(result);
+  } catch (error) {
+    console.error('❌ Error obteniendo términos del líder:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // Ruta para obtener todos los usuarios (admin)
@@ -496,6 +634,8 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+console.log('✅ Todas las rutas configuradas');
+
 // ⚠️ IMPORTANTE: Para hosting compartido, NO usar app.listen()
 // El hosting (Phusion Passenger) se encargará de iniciar la app
 
@@ -507,3 +647,7 @@ if (process.env.NODE_ENV === 'development') {
     console.log(`🌐 http://localhost:${PORT}`);
   });
 }
+
+console.log('✅ Servidor configurado correctamente');
+
+module.exports = app;
