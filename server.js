@@ -639,15 +639,20 @@ console.log('✅ Todas las rutas configuradas');
 // ⚠️ IMPORTANTE: Para hosting compartido, NO usar app.listen()
 // El hosting (Phusion Passenger) se encargará de iniciar la app
 
-// Solo para desarrollo local
+// 🚨 AGREGAR ESTO PARA RENDER
 if (process.env.NODE_ENV === 'development') {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Servidor de desarrollo corriendo en puerto ${PORT}`);
     console.log(`🌐 http://localhost:${PORT}`);
   });
+} else {
+  // �� PARA PRODUCCIÓN EN RENDER
+  const PORT = process.env.PORT || 10000;
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Servidor de producción corriendo en puerto ${PORT}`);
+    console.log(`🌐 Puerto asignado por Render: ${PORT}`);
+  });
 }
-
-console.log('✅ Servidor configurado correctamente');
 
 module.exports = app;
