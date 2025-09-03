@@ -68,7 +68,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.get('/api/test-connection', async (req, res) => {
   console.log('🔍 Petición GET /api/test-connection');
   try {
-    const isConnected = await testConnection();
+    const isConnected = await database.testConnection();
     console.log('✅ Conexión BD exitosa:', isConnected);
     res.json({ connected: isConnected });
   } catch (error) {
@@ -90,7 +90,7 @@ app.post('/api/login', async (req, res) => {
   }
 
   try {
-    const result = await authenticateUser(email, password);
+    const result = await database.authenticateUser(email, password);
     console.log('✅ Login exitoso para:', email);
     res.json(result);
   } catch (error) {
@@ -112,7 +112,7 @@ app.post('/api/register', async (req, res) => {
   }
 
   try {
-    const result = await registerUser(nombres, apellidos, cedula, fecha_nacimiento, telefono, email, password);
+    const result = await database.registerUser(nombres, apellidos, cedula, fecha_nacimiento, telefono, email, password);
     console.log('✅ Usuario registrado:', email);
     res.json(result);
   } catch (error) {
@@ -134,7 +134,7 @@ app.get('/api/profile/:userId', async (req, res) => {
   }
 
   try {
-    const result = await getUserProfile(userId);
+    const result = await database.getUserProfile(userId);
     res.json(result);
   } catch (error) {
     console.error('❌ Error obteniendo perfil:', error);
@@ -156,7 +156,7 @@ app.put('/api/profile/:userId', async (req, res) => {
   }
 
   try {
-    const result = await updateUserProfile(userId, profileData);
+    const result = await database.updateUserProfile(userId, profileData);
     res.json(result);
   } catch (error) {
     console.error('❌ Error actualizando perfil:', error);
@@ -177,7 +177,7 @@ app.post('/api/admin/assign-reward', async (req, res) => {
   }
 
   try {
-    const result = await assignReward(userId, assignedBy, purchaseAmount);
+    const result = await database.assignReward(userId, assignedBy, purchaseAmount);
     res.json(result);
   } catch (error) {
     console.error('❌ Error asignando recompensa:', error);
@@ -198,7 +198,7 @@ app.post('/api/admin/assign-pandita', async (req, res) => {
   }
 
   try {
-    const result = await assignPandita(userId, assignedBy);
+    const result = await database.assignPandita(userId, assignedBy);
     res.json(result);
   } catch (error) {
     console.error('❌ Error asignando pandita:', error);
@@ -222,7 +222,7 @@ app.post('/api/admin/assign-loyalty-balance', async (req, res) => {
   }
 
   try {
-    const result = await assignSaldoFidelizado(userId, assignedBy, amountToAssign);
+    const result = await database.assignSaldoFidelizado(userId, assignedBy, amountToAssign);
     res.json(result);
   } catch (error) {
     console.error('❌ Error asignando saldo fidelizado:', error);
@@ -243,7 +243,7 @@ app.get('/api/admin/stats/:adminId', async (req, res) => {
   }
 
   try {
-    const result = await getAdminStats(adminId);
+    const result = await database.getAdminStats(adminId);
     res.json(result);
   } catch (error) {
     console.error('❌ Error obteniendo estadísticas:', error);
@@ -264,7 +264,7 @@ app.get('/api/user/rewards/:userId', async (req, res) => {
   }
 
   try {
-    const result = await getUserRewards(userId);
+    const result = await database.getUserRewards(userId);
     res.json(result);
   } catch (error) {
     console.error('❌ Error obteniendo recompensas:', error);
@@ -285,7 +285,7 @@ app.put('/api/admin/update-profile', async (req, res) => {
   }
 
   try {
-    const result = await updateAdminProfile(email, currentPassword, newPassword, newEmail);
+    const result = await database.updateAdminProfile(email, currentPassword, newPassword, newEmail);
     res.json(result);
   } catch (error) {
     console.error('❌ Error en /api/admin/update-profile:', error);
@@ -306,7 +306,7 @@ app.get('/api/user/:userId', async (req, res) => {
   }
 
   try {
-    const result = await getUserById(userId);
+    const result = await database.getUserById(userId);
     res.json(result);
   } catch (error) {
     console.error('❌ Error obteniendo usuario:', error);
@@ -327,7 +327,7 @@ app.get('/api/user/loyalty-balance/:userId', async (req, res) => {
   }
 
   try {
-    const result = await getLoyaltyBalance(userId);
+    const result = await database.getLoyaltyBalance(userId);
     res.json(result);
   } catch (error) {
     console.error('❌ Error obteniendo saldo fidelizado:', error);
@@ -382,7 +382,7 @@ app.post('/api/admin/promotions', async (req, res) => {
   }
 
   try {
-    const result = await createPromotion(title, description || '', imageUrl || '', promotionType, createdBy);
+    const result = await database.createPromotion(title, description || '', imageUrl || '', promotionType, createdBy);
     res.json(result);
   } catch (error) {
     console.error('❌ Error creando promoción:', error);
@@ -394,7 +394,7 @@ app.post('/api/admin/promotions', async (req, res) => {
 app.get('/api/promotions', async (req, res) => {
   console.log('📨 Petición recibida en /api/promotions');
   try {
-    const result = await getPromotions();
+    const result = await database.getPromotions();
     console.log('📤 Promociones enviadas:', result.promotions);
     res.json(result);
   } catch (error) {
@@ -407,7 +407,7 @@ app.get('/api/promotions', async (req, res) => {
 app.get('/api/promo-del-mes', async (req, res) => {
   console.log('🌟 Petición recibida en /api/promo-del-mes');
   try {
-    const result = await getPromoDelMes();
+    const result = await database.getPromoDelMes();
     console.log('📤 Promoción del mes enviada:', result);
     res.json(result);
   } catch (error) {
@@ -429,7 +429,7 @@ app.get('/api/promotions/:type', async (req, res) => {
   }
   
   try {
-    const result = await getPromotionsByType(type);
+    const result = await database.getPromotionsByType(type);
     console.log(`📤 Promociones de tipo ${type} enviadas:`, result.promotions);
     res.json(result);
   } catch (error) {
@@ -454,7 +454,7 @@ app.delete('/api/admin/promotions/:promotionId', async (req, res) => {
 
   try {
     console.log('🔄 Llamando a deletePromotion con ID:', promotionId);
-    const result = await deletePromotion(promotionId);
+    const result = await database.deletePromotion(promotionId);
     console.log('📤 Resultado de eliminación:', result);
     
     res.json(result);
@@ -468,7 +468,7 @@ app.delete('/api/admin/promotions/:promotionId', async (req, res) => {
 app.post('/api/admin/cleanup-files', async (req, res) => {
   console.log('�� Iniciando limpieza de archivos huérfanos...');
   try {
-    const result = await cleanupOrphanedFiles();
+    const result = await database.cleanupOrphanedFiles();
     res.json(result);
   } catch (error) {
     console.error('❌ Error limpiando archivos:', error);
@@ -493,7 +493,7 @@ app.post('/api/admin/assign-leader-panda', async (req, res) => {
 
   try {
     console.log('�� Asignando panda de líder para usuario:', userId, 'por admin:', assignedBy);
-    const result = await assignLeaderPanda(userId, assignedBy);
+    const result = await database.assignLeaderPanda(userId, assignedBy);
     console.log('�� Resultado de asignación de panda de líder:', result);
     
     res.json(result);
@@ -517,7 +517,7 @@ app.get('/api/user/leader-pandas/:userId', async (req, res) => {
   }
 
   try {
-    const result = await getUserLeaderPandas(userId);
+    const result = await database.getUserLeaderPandas(userId);
     console.log('📤 Pandas de líder enviados:', result);
     
     res.json(result);
@@ -536,7 +536,7 @@ app.post('/api/admin/remove-leader-pandas', async (req, res) => {
     return res.status(400).json({ success: false, message: 'ID de usuario es requerido' });
   }
   try {
-    const result = await removeLeaderPandas(userId);
+    const result = await database.removeLeaderPandas(userId);
     res.json(result);
   } catch (error) {
     console.error('❌ Error en /api/admin/remove-leader-pandas:', error);
@@ -560,7 +560,7 @@ app.get('/api/config/text/:keyName', async (req, res) => {
   }
 
   try {
-    const result = await getConfigText(keyName);
+    const result = await database.getConfigText(keyName);
     console.log('�� Texto configurable enviado:', result);
     
     res.json(result);
@@ -585,7 +585,7 @@ app.put('/api/admin/config/text/:keyName', async (req, res) => {
   }
 
   try {
-    const result = await updateConfigText(keyName, newText);
+    const result = await database.updateConfigText(keyName, newText);
     console.log('📤 Resultado de actualización de texto:', result);
     
     res.json(result);
@@ -600,7 +600,7 @@ app.get('/api/config-texts/leader-terms', async (req, res) => {
   console.log('🏆 Petición para obtener términos del programa líder');
   
   try {
-    const result = await getConfigText('leader_terms');
+    const result = await database.getConfigText('leader_terms');
     console.log('📤 Términos del programa líder enviados:', result);
     
     res.json(result);
